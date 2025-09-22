@@ -9,7 +9,7 @@ builder.Services.AddCors(options =>
                       policy =>
                       {
                           // Укажите здесь URL вашего фронтенда на Vercel
-                          policy.WithOrigins("https://angular-portfolio-pi-nine.vercel.app/")
+                          policy.WithOrigins("https://angular-portfolio-pi-nine.vercel.app")
                                 .AllowAnyHeader()
                                 .AllowAnyMethod();
                       });
