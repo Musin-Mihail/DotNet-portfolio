@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>DotNet_portfolio</RootNamespace>
+    <UserSecretsId>c95dac58-7f84-4350-a2c4-59c8eae44efc</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
