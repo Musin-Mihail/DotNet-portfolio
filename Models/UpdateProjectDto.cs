@@ -3,12 +3,10 @@ using System.ComponentModel.DataAnnotations;
 namespace DotNet_portfolio.Models
 {
     /// <summary>
-    /// Represents a project in the portfolio.
+    /// DTO for updating a project.
     /// </summary>
-    public class Project
+    public class UpdateProjectDto
     {
-        public int Id { get; set; }
-
         [Required(ErrorMessage = "A title is required.")]
         [StringLength(100, ErrorMessage = "The title cannot exceed 100 characters.")]
         public required string Title { get; set; }
