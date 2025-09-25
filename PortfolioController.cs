@@ -3,7 +3,6 @@ using DotNet_portfolio.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-
 namespace DotNet_portfolio.Controllers
 {
     [ApiController]
@@ -19,10 +18,16 @@ namespace DotNet_portfolio.Controllers
             _logger = logger;
         }
 
+        [HttpGet("/portfolio")]
+        public IActionResult GetPortfolioMessage()
+        {
+            return Ok(new { message = "Hello from the .NET backend!" });
+        }
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Project>>> GetProjects()
         {
-            return await _context.Projects.ToListAsync();
+            return await _context.Projects.OrderBy(p => p.Id).ToListAsync();
         }
 
         [HttpGet("{id}")]
@@ -57,7 +62,6 @@ namespace DotNet_portfolio.Controllers
                 entry.Entity.Id,
                 entry.State
             );
-
             try
             {
                 await _context.SaveChangesAsync();
@@ -94,7 +98,6 @@ namespace DotNet_portfolio.Controllers
                 ProjectUrl = dto.ProjectUrl,
                 Tags = dto.Tags
             }).ToList();
-
             _context.Projects.AddRange(projects);
 
             try
@@ -114,7 +117,6 @@ namespace DotNet_portfolio.Controllers
         public async Task<IActionResult> UpdateProject(int id, UpdateProjectDto projectDto)
         {
             var projectToUpdate = await _context.Projects.FindAsync(id);
-
             if (projectToUpdate == null)
             {
                 return NotFound();
