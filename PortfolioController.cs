@@ -56,12 +56,6 @@ namespace DotNet_portfolio.Controllers
             _logger.LogInformation("Создан новый объект Project в памяти. Его ID: {ProjectId}", project.Id);
             _context.Projects.Add(project);
             var entry = _context.Entry(project);
-            _logger.LogInformation(
-                "EF Change Tracker видит проект '{ProjectTitle}' с ID {ProjectId} в состоянии '{State}'",
-                entry.Entity.Title,
-                entry.Entity.Id,
-                entry.State
-            );
             try
             {
                 await _context.SaveChangesAsync();
