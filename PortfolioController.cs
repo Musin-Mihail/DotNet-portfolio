@@ -21,7 +21,7 @@ namespace DotNet_portfolio.Controllers
         [HttpGet("/portfolio")]
         public IActionResult GetPortfolioMessage()
         {
-            return Ok(new { message = "Hello from the .NET backend!" });
+            return Ok(new { message = "Portfolio API is running successfully." });
         }
 
         [HttpGet]

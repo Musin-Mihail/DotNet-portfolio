@@ -59,7 +59,7 @@
 
 1.  **Клонируйте репозиторий:**
 
-    git clone <URL-вашего-репозитория>
+    git clone https://github.com/Musin-Mihail/DotNet-portfolio.git
     cd <имя-папки-репозитория>
 
 2.  **Настройте строку подключения:** Откройте файл `appsettings.json` и измените `DefaultConnection` для подключения к вашему экземпляру PostgreSQL.
