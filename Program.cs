@@ -1,20 +1,27 @@
 using DotNet_portfolio.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: myAllowSpecificOrigins, policy =>
-    {
-        policy.WithOrigins("https://angular-portfolio-pi-nine.vercel.app", "http://localhost:4200")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
+    options.AddPolicy(
+        name: myAllowSpecificOrigins,
+        policy =>
+        {
+            policy
+                .WithOrigins(
+                    "https://angular-portfolio-pi-nine.vercel.app",
+                    "http://localhost:4200"
+                )
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+    );
 });
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<PortfolioDbContext>(options =>
-    options.UseNpgsql(connectionString));
+builder.Services.AddDbContext<PortfolioDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

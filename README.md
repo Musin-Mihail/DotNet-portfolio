@@ -46,14 +46,13 @@
 
 | `DELETE` | `/api/Projects/{id}` | Удаляет проект по его ID. |
 
-
 ## ⚙️ Начало работы
 
 ### Требования
 
-- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0 'null')
+- [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0 "null")
 
-- [PostgreSQL](https://www.postgresql.org/download/ 'null')
+- [PostgreSQL](https://www.postgresql.org/download/ "null")
 
 ### Установка
 

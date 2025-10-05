@@ -3,6 +3,7 @@ using DotNet_portfolio.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+
 namespace DotNet_portfolio.Controllers
 {
     [ApiController]
@@ -51,9 +52,12 @@ namespace DotNet_portfolio.Controllers
                 Description = projectDto.Description,
                 ImageUrl = projectDto.ImageUrl,
                 ProjectUrl = projectDto.ProjectUrl,
-                Tags = projectDto.Tags
+                Tags = projectDto.Tags,
             };
-            _logger.LogInformation("Создан новый объект Project в памяти. Его ID: {ProjectId}", project.Id);
+            _logger.LogInformation(
+                "Создан новый объект Project в памяти. Его ID: {ProjectId}",
+                project.Id
+            );
             _context.Projects.Add(project);
             var entry = _context.Entry(project);
             try
@@ -61,10 +65,14 @@ namespace DotNet_portfolio.Controllers
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
-                when (ex.InnerException is PostgresException postgresEx && postgresEx.SqlState == "23505")
+                when (ex.InnerException is PostgresException postgresEx
+                    && postgresEx.SqlState == "23505"
+                )
             {
                 _logger.LogError(ex, "Поймана ошибка уникальности при сохранении.");
-                return Conflict(new { message = $"Проект с названием '{project.Title}' уже существует." });
+                return Conflict(
+                    new { message = $"Проект с названием '{project.Title}' уже существует." }
+                );
             }
             catch (Exception ex)
             {
@@ -72,26 +80,33 @@ namespace DotNet_portfolio.Controllers
                 throw;
             }
 
-            _logger.LogInformation("Проект успешно сохранен. Новый ID от базы данных: {ProjectId}", project.Id);
+            _logger.LogInformation(
+                "Проект успешно сохранен. Новый ID от базы данных: {ProjectId}",
+                project.Id
+            );
             return CreatedAtAction(nameof(GetProjectById), new { id = project.Id }, project);
         }
 
         [HttpPost("bulk")]
-        public async Task<ActionResult<IEnumerable<Project>>> CreateProjects(IEnumerable<CreateProjectDto> projectDtos)
+        public async Task<ActionResult<IEnumerable<Project>>> CreateProjects(
+            IEnumerable<CreateProjectDto> projectDtos
+        )
         {
             if (projectDtos == null || !projectDtos.Any())
             {
                 return BadRequest("Список проектов не может быть пустым.");
             }
 
-            var projects = projectDtos.Select(dto => new Project
-            {
-                Title = dto.Title,
-                Description = dto.Description,
-                ImageUrl = dto.ImageUrl,
-                ProjectUrl = dto.ProjectUrl,
-                Tags = dto.Tags
-            }).ToList();
+            var projects = projectDtos
+                .Select(dto => new Project
+                {
+                    Title = dto.Title,
+                    Description = dto.Description,
+                    ImageUrl = dto.ImageUrl,
+                    ProjectUrl = dto.ProjectUrl,
+                    Tags = dto.Tags,
+                })
+                .ToList();
             _context.Projects.AddRange(projects);
 
             try
@@ -99,9 +114,16 @@ namespace DotNet_portfolio.Controllers
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
-                when (ex.InnerException is PostgresException postgresEx && postgresEx.SqlState == "23505")
+                when (ex.InnerException is PostgresException postgresEx
+                    && postgresEx.SqlState == "23505"
+                )
             {
-                return Conflict(new { message = "Один или несколько проектов имеют названия, которые уже существуют." });
+                return Conflict(
+                    new
+                    {
+                        message = "Один или несколько проектов имеют названия, которые уже существуют.",
+                    }
+                );
             }
 
             return Ok(projects);
@@ -127,9 +149,13 @@ namespace DotNet_portfolio.Controllers
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException ex)
-                when (ex.InnerException is PostgresException postgresEx && postgresEx.SqlState == "23505")
+                when (ex.InnerException is PostgresException postgresEx
+                    && postgresEx.SqlState == "23505"
+                )
             {
-                return Conflict(new { message = $"Проект с названием '{projectDto.Title}' уже существует." });
+                return Conflict(
+                    new { message = $"Проект с названием '{projectDto.Title}' уже существует." }
+                );
             }
 
             return NoContent();
