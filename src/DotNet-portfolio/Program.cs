@@ -1,4 +1,5 @@
 using DotNet_portfolio.Data;
+using DotNet_portfolio.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -22,6 +23,9 @@ builder.Services.AddCors(options =>
 });
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<PortfolioDbContext>(options => options.UseNpgsql(connectionString));
+
+builder.Services.AddScoped<IDbErrorService, NpgsqlErrorService>();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

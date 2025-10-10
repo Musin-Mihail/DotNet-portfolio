@@ -11,6 +11,6 @@ namespace DotNet_portfolio.Data
         public PortfolioDbContext(DbContextOptions<PortfolioDbContext> options)
             : base(options) { }
 
-        public DbSet<Project> Projects { get; set; }
+        public virtual DbSet<Project> Projects { get; set; }
     }
 }

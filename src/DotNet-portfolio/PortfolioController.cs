@@ -1,8 +1,8 @@
 using DotNet_portfolio.Data;
 using DotNet_portfolio.Models;
+using DotNet_portfolio.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 
 namespace DotNet_portfolio.Controllers
 {
@@ -12,11 +12,17 @@ namespace DotNet_portfolio.Controllers
     {
         private readonly PortfolioDbContext _context;
         private readonly ILogger<ProjectsController> _logger;
+        private readonly IDbErrorService _dbErrorService;
 
-        public ProjectsController(PortfolioDbContext context, ILogger<ProjectsController> logger)
+        public ProjectsController(
+            PortfolioDbContext context,
+            ILogger<ProjectsController> logger,
+            IDbErrorService dbErrorService
+        )
         {
             _context = context;
             _logger = logger;
+            _dbErrorService = dbErrorService;
         }
 
         [HttpGet("/portfolio")]
@@ -54,20 +60,12 @@ namespace DotNet_portfolio.Controllers
                 ProjectUrl = projectDto.ProjectUrl,
                 Tags = projectDto.Tags,
             };
-            _logger.LogInformation(
-                "Создан новый объект Project в памяти. Его ID: {ProjectId}",
-                project.Id
-            );
             _context.Projects.Add(project);
-            var entry = _context.Entry(project);
             try
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateException ex)
-                when (ex.InnerException is PostgresException postgresEx
-                    && postgresEx.SqlState == "23505"
-                )
+            catch (DbUpdateException ex) when (_dbErrorService.IsUniqueConstraintViolation(ex))
             {
                 _logger.LogError(ex, "Поймана ошибка уникальности при сохранении.");
                 return Conflict(
@@ -80,10 +78,6 @@ namespace DotNet_portfolio.Controllers
                 throw;
             }
 
-            _logger.LogInformation(
-                "Проект успешно сохранен. Новый ID от базы данных: {ProjectId}",
-                project.Id
-            );
             return CreatedAtAction(nameof(GetProjectById), new { id = project.Id }, project);
         }
 
@@ -113,10 +107,7 @@ namespace DotNet_portfolio.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateException ex)
-                when (ex.InnerException is PostgresException postgresEx
-                    && postgresEx.SqlState == "23505"
-                )
+            catch (DbUpdateException ex) when (_dbErrorService.IsUniqueConstraintViolation(ex))
             {
                 return Conflict(
                     new
@@ -148,10 +139,7 @@ namespace DotNet_portfolio.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateException ex)
-                when (ex.InnerException is PostgresException postgresEx
-                    && postgresEx.SqlState == "23505"
-                )
+            catch (DbUpdateException ex) when (_dbErrorService.IsUniqueConstraintViolation(ex))
             {
                 return Conflict(
                     new { message = $"Проект с названием '{projectDto.Title}' уже существует." }
