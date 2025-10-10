@@ -384,5 +384,86 @@ namespace DotNet_portfolio.Tests
 
             Assert.IsType<NotFoundResult>(result);
         }
+
+        [Fact]
+        public async Task CreateProjects_ReturnsOk_WithValidData()
+        {
+            await using var context = new PortfolioDbContext(_dbOptions);
+            var controller = new ProjectsController(
+                context,
+                _mockLogger.Object,
+                _mockDbErrorService.Object
+            );
+            var projectDtos = new List<CreateProjectDto>
+            {
+                new()
+                {
+                    Title = "Project Bulk 1",
+                    Description = "Desc 1",
+                    ProjectUrl = "http://b1.com",
+                },
+                new()
+                {
+                    Title = "Project Bulk 2",
+                    Description = "Desc 2",
+                    ProjectUrl = "http://b2.com",
+                },
+            };
+
+            var result = await controller.CreateProjects(projectDtos);
+
+            var actionResult = Assert.IsType<ActionResult<IEnumerable<Project>>>(result);
+            var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+            var returnedProjects = Assert.IsAssignableFrom<IEnumerable<Project>>(okResult.Value);
+            Assert.Equal(2, returnedProjects.Count());
+            Assert.Equal(2, await context.Projects.CountAsync());
+        }
+
+        [Fact]
+        public async Task CreateProjects_ReturnsBadRequest_WhenInputIsNull()
+        {
+            await using var context = new PortfolioDbContext(_dbOptions);
+            var controller = new ProjectsController(
+                context,
+                _mockLogger.Object,
+                _mockDbErrorService.Object
+            );
+
+#pragma warning disable CS8625
+            var result = await controller.CreateProjects(null);
+#pragma warning restore CS8625
+
+            var actionResult = Assert.IsType<ActionResult<IEnumerable<Project>>>(result);
+            Assert.IsType<BadRequestObjectResult>(actionResult.Result);
+        }
+
+        [Fact]
+        public async Task CreateProject_ThrowsException_WhenGenericDbErrorOccurs()
+        {
+            var mockContext = new Mock<PortfolioDbContext>(_dbOptions);
+            var mockSet = new Mock<DbSet<Project>>();
+            var genericException = new Exception("Simulated generic DB error");
+
+            mockContext.Setup(m => m.Projects).Returns(mockSet.Object);
+            mockContext.Setup(m => m.SaveChangesAsync(default)).ThrowsAsync(genericException);
+
+            var controller = new ProjectsController(
+                mockContext.Object,
+                _mockLogger.Object,
+                _mockDbErrorService.Object
+            );
+
+            var projectDto = new CreateProjectDto
+            {
+                Title = "Test",
+                Description = "Test desc",
+                ProjectUrl = "http://test.com",
+            };
+
+            var ex = await Assert.ThrowsAsync<Exception>(() =>
+                controller.CreateProject(projectDto)
+            );
+            Assert.Equal("Simulated generic DB error", ex.Message);
+        }
     }
 }
