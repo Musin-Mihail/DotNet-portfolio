@@ -19,6 +19,6 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DotNet-portfolio.csproj" />
+    <ProjectReference Include="..\..\src\DotNet-portfolio\DotNet-portfolio.csproj" />
   </ItemGroup>
 </Project>

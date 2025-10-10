@@ -7,11 +7,6 @@
     <UserSecretsId>c95dac58-7f84-4350-a2c4-59c8eae44efc</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="DotNet-portfolio.Tests\**" />
-    <EmbeddedResource Remove="DotNet-portfolio.Tests\**" />
-    <None Remove="DotNet-portfolio.Tests\**" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.20" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.20">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

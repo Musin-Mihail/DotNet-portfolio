@@ -21,41 +21,56 @@
 
 ## API Эндпоинты
 
-Ниже приведены основные эндпоинты, доступные в этом API:
-| Метод | URL | Описание |
+| Метод    | URL                  | Описание                                    |
 | -------- | -------------------- | ------------------------------------------- |
-| `GET` | `/portfolio` | Возвращает приветственное сообщение от API. |
-| `GET` | `/api/Projects` | Получает список всех проектов. |
-| `GET` | `/api/Projects/{id}` | Получает конкретный проект по его ID. |
-| `POST` | `/api/Projects` | Создаёт новый проект. |
-| `POST` | `/api/Projects/bulk` | Создаёт несколько проектов одним запросом. |
-| `PUT` | `/api/Projects/{id}` | Обновляет существующий проект по его ID. |
-| `DELETE` | `/api/Projects/{id}` | Удаляет проект по его ID. |
+| `GET`    | `/portfolio`         | Возвращает приветственное сообщение от API. |
+| `GET`    | `/api/Projects`      | Получает список всех проектов.              |
+| `GET`    | `/api/Projects/{id}` | Получает конкретный проект по его ID.       |
+| `POST`   | `/api/Projects`      | Создаёт новый проект.                       |
+| `POST`   | `/api/Projects/bulk` | Создаёт несколько проектов одним запросом.  |
+| `PUT`    | `/api/Projects/{id}` | Обновляет существующий проект по его ID.    |
+| `DELETE` | `/api/Projects/{id}` | Удаляет проект по его ID.                   |
 
 ## ⚙️ Начало работы
 
 ### Требования
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0 "null")
-- [PostgreSQL](https://www.postgresql.org/download/ "null")
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [PostgreSQL](https://www.postgresql.org/download/)
 
 ### Установка
 
 1.  **Клонируйте репозиторий:**
+
+    ```bash
     git clone https://github.com/Musin-Mihail/DotNet-portfolio.git
     cd DotNet-portfolio
+    ```
 
-2.  **Настройте строку подключения:** Откройте файл `appsettings.json` и измените `DefaultConnection` для подключения к вашему экземпляру PostgreSQL.
+2.  **Настройте строку подключения:**
+    Откройте файл `src/DotNet-portfolio/appsettings.json` и измените `DefaultConnection` для подключения к вашему экземпляру PostgreSQL.
+
+    ```json
     "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=your_db;Username=your_user;Password=your_password"
+      "DefaultConnection": "Host=localhost;Port=5432;Database=your_db;Username=your_user;Password=your_password"
     }
+    ```
 
-3.  **Примените миграции:** Выполните команду в терминале в корневой папке проекта, чтобы создать таблицы в базе данных.
-    dotnet ef database update
+3.  **Примените миграции:**
+    Выполните команду в терминале из **корневой папки** проекта, чтобы создать таблицы в базе данных.
+
+    ```bash
+    dotnet ef database update --project src/DotNet-portfolio/DotNet-portfolio.csproj
+    ```
 
 4.  **Запустите проект:**
-    dotnet run
+    Выполните команду из **корневой папки** проекта.
+
+    ```bash
+    dotnet run --project src/DotNet-portfolio/DotNet-portfolio.csproj
+    ```
 
     Приложение запустится на `http://localhost:5160` и `https://localhost:7174`.
 
-5.  **Просмотр документации API:** В среде разработки откройте браузер и перейдите по адресу `http://localhost:5160`, чтобы увидеть UI Swagger и протестировать эндпоинты.
+5.  **Просмотр документации API:**
+    В среде разработки откройте браузер и перейдите по адресу `http://localhost:5160`, чтобы увидеть UI Swagger и протестировать эндпоинты.
