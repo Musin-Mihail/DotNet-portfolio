@@ -65,7 +65,8 @@ namespace DotNet_portfolio.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateException ex) when (_dbErrorService.IsUniqueConstraintViolation(ex))
+            catch (DbUpdateException ex)
+                when (_dbErrorService.IsUniqueConstraintViolation(ex.InnerException))
             {
                 _logger.LogError(ex, "Поймана ошибка уникальности при сохранении.");
                 return Conflict(
@@ -107,7 +108,8 @@ namespace DotNet_portfolio.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateException ex) when (_dbErrorService.IsUniqueConstraintViolation(ex))
+            catch (DbUpdateException ex)
+                when (_dbErrorService.IsUniqueConstraintViolation(ex.InnerException))
             {
                 return Conflict(
                     new
@@ -139,7 +141,8 @@ namespace DotNet_portfolio.Controllers
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateException ex) when (_dbErrorService.IsUniqueConstraintViolation(ex))
+            catch (DbUpdateException ex)
+                when (_dbErrorService.IsUniqueConstraintViolation(ex.InnerException))
             {
                 return Conflict(
                     new { message = $"Проект с названием '{projectDto.Title}' уже существует." }

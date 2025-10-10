@@ -7,10 +7,9 @@ namespace DotNet_portfolio.Services
     {
         private const string UniqueViolation_SqlState = "23505";
 
-        public bool IsUniqueConstraintViolation(DbUpdateException ex)
+        public bool IsUniqueConstraintViolation(Exception? ex)
         {
-            return ex.InnerException is PostgresException postgresEx
-                && postgresEx.SqlState == UniqueViolation_SqlState;
+            return ex is NpgsqlException npgsqlEx && npgsqlEx.SqlState == UniqueViolation_SqlState;
         }
     }
 }

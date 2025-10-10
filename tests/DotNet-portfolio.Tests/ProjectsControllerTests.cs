@@ -95,7 +95,7 @@ namespace DotNet_portfolio.Tests
             mockContext.Setup(m => m.SaveChangesAsync(default)).ThrowsAsync(dbUpdateException);
 
             _mockDbErrorService
-                .Setup(s => s.IsUniqueConstraintViolation(dbUpdateException))
+                .Setup(s => s.IsUniqueConstraintViolation(dbUpdateException.InnerException))
                 .Returns(true);
 
             var controller = new ProjectsController(
@@ -136,7 +136,7 @@ namespace DotNet_portfolio.Tests
             mockContext.Setup(m => m.SaveChangesAsync(default)).ThrowsAsync(dbUpdateException);
 
             _mockDbErrorService
-                .Setup(s => s.IsUniqueConstraintViolation(dbUpdateException))
+                .Setup(s => s.IsUniqueConstraintViolation(dbUpdateException.InnerException))
                 .Returns(true);
 
             var controller = new ProjectsController(
@@ -167,7 +167,7 @@ namespace DotNet_portfolio.Tests
             mockContext.Setup(m => m.SaveChangesAsync(default)).ThrowsAsync(dbUpdateException);
 
             _mockDbErrorService
-                .Setup(s => s.IsUniqueConstraintViolation(dbUpdateException))
+                .Setup(s => s.IsUniqueConstraintViolation(dbUpdateException.InnerException))
                 .Returns(true);
 
             var controller = new ProjectsController(
@@ -189,6 +189,200 @@ namespace DotNet_portfolio.Tests
 
             var actionResult = Assert.IsType<ActionResult<IEnumerable<Project>>>(result);
             Assert.IsType<ConflictObjectResult>(actionResult.Result);
+        }
+
+        [Fact]
+        public async Task GetProjectById_ReturnsNotFound_WhenProjectDoesNotExist()
+        {
+            await using var context = new PortfolioDbContext(_dbOptions);
+            var controller = new ProjectsController(
+                context,
+                _mockLogger.Object,
+                _mockDbErrorService.Object
+            );
+
+            var result = await controller.GetProjectById(999);
+
+            Assert.IsType<NotFoundResult>(result.Result);
+        }
+
+        [Fact]
+        public async Task GetProjectById_ReturnsProject_WhenProjectExists()
+        {
+            var project = new Project
+            {
+                Id = 1,
+                Title = "Test Project",
+                Description = "Desc",
+                ProjectUrl = "http://test.com",
+            };
+            await using (var context = new PortfolioDbContext(_dbOptions))
+            {
+                context.Projects.Add(project);
+                await context.SaveChangesAsync();
+            }
+
+            await using (var context = new PortfolioDbContext(_dbOptions))
+            {
+                var controller = new ProjectsController(
+                    context,
+                    _mockLogger.Object,
+                    _mockDbErrorService.Object
+                );
+
+                var result = await controller.GetProjectById(1);
+
+                var actionResult = Assert.IsType<ActionResult<Project>>(result);
+                var okResult = Assert.IsType<Project>(actionResult.Value);
+                Assert.Equal("Test Project", okResult.Title);
+            }
+        }
+
+        [Fact]
+        public async Task CreateProject_ReturnsCreatedAtAction_WithValidModel()
+        {
+            await using var context = new PortfolioDbContext(_dbOptions);
+            var controller = new ProjectsController(
+                context,
+                _mockLogger.Object,
+                _mockDbErrorService.Object
+            );
+            var projectDto = new CreateProjectDto
+            {
+                Title = "New Project",
+                Description = "Desc",
+                ProjectUrl = "http://new.com",
+            };
+
+            var result = await controller.CreateProject(projectDto);
+
+            var actionResult = Assert.IsType<ActionResult<Project>>(result);
+            var createdResult = Assert.IsType<CreatedAtActionResult>(actionResult.Result);
+            var project = Assert.IsType<Project>(createdResult.Value);
+            Assert.Equal("New Project", project.Title);
+            Assert.Equal(1, await context.Projects.CountAsync());
+        }
+
+        [Fact]
+        public async Task CreateProjects_ReturnsBadRequest_WhenInputIsEmpty()
+        {
+            await using var context = new PortfolioDbContext(_dbOptions);
+            var controller = new ProjectsController(
+                context,
+                _mockLogger.Object,
+                _mockDbErrorService.Object
+            );
+            var emptyList = new List<CreateProjectDto>();
+
+            var result = await controller.CreateProjects(emptyList);
+
+            var actionResult = Assert.IsType<ActionResult<IEnumerable<Project>>>(result);
+            Assert.IsType<BadRequestObjectResult>(actionResult.Result);
+        }
+
+        [Fact]
+        public async Task UpdateProject_ReturnsNoContent_WhenSuccessful()
+        {
+            var project = new Project
+            {
+                Id = 1,
+                Title = "Old Title",
+                Description = "Old Desc",
+                ProjectUrl = "http://old.com",
+            };
+            await using (var context = new PortfolioDbContext(_dbOptions))
+            {
+                context.Projects.Add(project);
+                await context.SaveChangesAsync();
+            }
+
+            await using (var context = new PortfolioDbContext(_dbOptions))
+            {
+                var controller = new ProjectsController(
+                    context,
+                    _mockLogger.Object,
+                    _mockDbErrorService.Object
+                );
+                var projectDto = new UpdateProjectDto
+                {
+                    Title = "New Title",
+                    Description = "New Desc",
+                    ProjectUrl = "http://new.com",
+                };
+
+                var result = await controller.UpdateProject(1, projectDto);
+
+                Assert.IsType<NoContentResult>(result);
+                var updatedProject = await context.Projects.FindAsync(1);
+                Assert.Equal("New Title", updatedProject?.Title);
+            }
+        }
+
+        [Fact]
+        public async Task UpdateProject_ReturnsNotFound_WhenProjectDoesNotExist()
+        {
+            await using var context = new PortfolioDbContext(_dbOptions);
+            var controller = new ProjectsController(
+                context,
+                _mockLogger.Object,
+                _mockDbErrorService.Object
+            );
+            var projectDto = new UpdateProjectDto
+            {
+                Title = "Any",
+                Description = "Any",
+                ProjectUrl = "http://any.com",
+            };
+
+            var result = await controller.UpdateProject(999, projectDto);
+
+            Assert.IsType<NotFoundResult>(result);
+        }
+
+        [Fact]
+        public async Task DeleteProject_ReturnsNoContent_WhenSuccessful()
+        {
+            var project = new Project
+            {
+                Id = 1,
+                Title = "To Delete",
+                Description = "Desc",
+                ProjectUrl = "http://delete.com",
+            };
+            await using (var context = new PortfolioDbContext(_dbOptions))
+            {
+                context.Projects.Add(project);
+                await context.SaveChangesAsync();
+            }
+
+            await using (var context = new PortfolioDbContext(_dbOptions))
+            {
+                var controller = new ProjectsController(
+                    context,
+                    _mockLogger.Object,
+                    _mockDbErrorService.Object
+                );
+
+                var result = await controller.DeleteProject(1);
+
+                Assert.IsType<NoContentResult>(result);
+                Assert.Equal(0, await context.Projects.CountAsync());
+            }
+        }
+
+        [Fact]
+        public async Task DeleteProject_ReturnsNotFound_WhenProjectDoesNotExist()
+        {
+            await using var context = new PortfolioDbContext(_dbOptions);
+            var controller = new ProjectsController(
+                context,
+                _mockLogger.Object,
+                _mockDbErrorService.Object
+            );
+
+            var result = await controller.DeleteProject(999);
+
+            Assert.IsType<NotFoundResult>(result);
         }
     }
 }
