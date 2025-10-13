@@ -1,10 +1,12 @@
 using DotNet_portfolio.Data;
+using DotNet_portfolio.Hubs;
 using DotNet_portfolio.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
@@ -17,15 +19,18 @@ builder.Services.AddCors(options =>
                     "http://localhost:4200"
                 )
                 .AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowAnyMethod()
+                .AllowCredentials();
         }
     );
 });
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<PortfolioDbContext>(options => options.UseNpgsql(connectionString));
-
 builder.Services.AddScoped<IDbErrorService, NpgsqlErrorService>();
-
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IMessageProducer, RabbitMQProducer>();
+builder.Services.AddHostedService<RabbitMQConsumer>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -46,4 +51,5 @@ app.UseCors(myAllowSpecificOrigins);
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 app.Run();
