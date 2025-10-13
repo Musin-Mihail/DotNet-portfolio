@@ -51,12 +51,14 @@ namespace DotNet_portfolio.Services
         {
             stoppingToken.ThrowIfCancellationRequested();
 
+            var arguments = new Dictionary<string, object> { { "x-queue-type", "quorum" } };
+
             _channel.QueueDeclare(
                 queue: QueueName,
-                durable: false,
+                durable: true,
                 exclusive: false,
                 autoDelete: false,
-                arguments: null
+                arguments: arguments
             );
 
             var consumer = new EventingBasicConsumer(_channel);

@@ -30,12 +30,14 @@ namespace DotNet_portfolio.Services
                 var factory = new ConnectionFactory() { Uri = new Uri(connectionString) };
                 _connection = factory.CreateConnection();
                 _channel = _connection.CreateModel();
+                var arguments = new Dictionary<string, object> { { "x-queue-type", "quorum" } };
+
                 _channel.QueueDeclare(
                     queue: QueueName,
-                    durable: false,
+                    durable: true,
                     exclusive: false,
                     autoDelete: false,
-                    arguments: null
+                    arguments: arguments
                 );
                 _logger.LogInformation("Successfully connected to RabbitMQ.");
             }
