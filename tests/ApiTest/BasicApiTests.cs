@@ -44,8 +44,7 @@ namespace ApiTest
                         }
 
                         var dbOptionsDescriptor = services.SingleOrDefault(d =>
-                            d.ServiceType == typeof(                        // --- МОК RABBITMQ ---
-<PortfolioDbContext>)
+                            d.ServiceType == typeof(DbContextOptions<PortfolioDbContext>)
                         );
                         if (dbOptionsDescriptor != null)
                         {
