@@ -1,6 +1,8 @@
 ﻿using System.Net;
+using DotNet_portfolio.Data;
 using DotNet_portfolio.Services;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ApiTest
@@ -19,7 +21,6 @@ namespace ApiTest
                         var producerDescriptor = services.SingleOrDefault(d =>
                             d.ServiceType == typeof(IMessageProducer)
                         );
-
                         if (producerDescriptor != null)
                         {
                             services.Remove(producerDescriptor);
@@ -28,27 +29,33 @@ namespace ApiTest
                         var consumerDescriptor = services.SingleOrDefault(d =>
                             d.ImplementationType == typeof(RabbitMQConsumer)
                         );
-
                         if (consumerDescriptor != null)
                         {
                             services.Remove(consumerDescriptor);
                         }
 
                         services.AddSingleton<IMessageProducer, FakeMessageProducer>();
+
+                        var dbContextDescriptor = services.SingleOrDefault(d =>
+                            d.ServiceType == typeof(DbContextOptions<PortfolioDbContext>)
+                        );
+                        if (dbContextDescriptor != null)
+                        {
+                            services.Remove(dbContextDescriptor);
+                        }
+
+                        services.AddDbContext<PortfolioDbContext>(options =>
+                        {
+                            options.UseInMemoryDatabase("InMemoryDbForApiTesting");
+                        });
                     });
                 })
                 .CreateClient();
         }
 
-        /// <summary>
-        /// Фейковая реализация IMessageProducer, которая не требует подключения к RabbitMQ.
-        /// </summary>
         private class FakeMessageProducer : IMessageProducer
         {
-            public void SendMessage<T>(T message)
-            {
-                // Ничего не делаем, просто имитируем отправку
-            }
+            public void SendMessage<T>(T message) { }
         }
 
         [Fact]
