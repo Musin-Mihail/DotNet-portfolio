@@ -33,15 +33,23 @@ namespace ApiTest
                         {
                             services.Remove(consumerDescriptor);
                         }
-
                         services.AddSingleton<IMessageProducer, FakeMessageProducer>();
 
                         var dbContextDescriptor = services.SingleOrDefault(d =>
-                            d.ServiceType == typeof(DbContextOptions<PortfolioDbContext>)
+                            d.ServiceType == typeof(PortfolioDbContext)
                         );
                         if (dbContextDescriptor != null)
                         {
                             services.Remove(dbContextDescriptor);
+                        }
+
+                        var dbOptionsDescriptor = services.SingleOrDefault(d =>
+                            d.ServiceType == typeof(                        // --- МОК RABBITMQ ---
+<PortfolioDbContext>)
+                        );
+                        if (dbOptionsDescriptor != null)
+                        {
+                            services.Remove(dbOptionsDescriptor);
                         }
 
                         services.AddDbContext<PortfolioDbContext>(options =>
