@@ -1,25 +1,60 @@
 ﻿using System.Net;
+using DotNet_portfolio.Services;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ApiTest
 {
     public class BasicApiTests : IClassFixture<WebApplicationFactory<Program>>
     {
-        private readonly WebApplicationFactory<Program> _factory;
         private readonly HttpClient _client;
 
         public BasicApiTests(WebApplicationFactory<Program> factory)
         {
-            _factory = factory;
-            _client = _factory.CreateClient();
+            _client = factory
+                .WithWebHostBuilder(builder =>
+                {
+                    builder.ConfigureServices(services =>
+                    {
+                        var producerDescriptor = services.SingleOrDefault(d =>
+                            d.ServiceType == typeof(IMessageProducer)
+                        );
+
+                        if (producerDescriptor != null)
+                        {
+                            services.Remove(producerDescriptor);
+                        }
+
+                        var consumerDescriptor = services.SingleOrDefault(d =>
+                            d.ImplementationType == typeof(RabbitMQConsumer)
+                        );
+
+                        if (consumerDescriptor != null)
+                        {
+                            services.Remove(consumerDescriptor);
+                        }
+
+                        services.AddSingleton<IMessageProducer, FakeMessageProducer>();
+                    });
+                })
+                .CreateClient();
+        }
+
+        /// <summary>
+        /// Фейковая реализация IMessageProducer, которая не требует подключения к RabbitMQ.
+        /// </summary>
+        private class FakeMessageProducer : IMessageProducer
+        {
+            public void SendMessage<T>(T message)
+            {
+                // Ничего не делаем, просто имитируем отправку
+            }
         }
 
         [Fact]
         public async Task GetPortfolioEndpoint_ReturnsSuccessAndCorrectMessage()
         {
             var url = "/portfolio";
-
             var response = await _client.GetAsync(url);
 
             response.EnsureSuccessStatusCode();
@@ -33,7 +68,6 @@ namespace ApiTest
         public async Task GetProjectsEndpoint_ReturnsSuccess()
         {
             var url = "/api/Projects";
-
             var response = await _client.GetAsync(url);
 
             response.EnsureSuccessStatusCode();
