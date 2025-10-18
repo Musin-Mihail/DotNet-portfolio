@@ -4,6 +4,7 @@ WORKDIR /src
 COPY ["DotNet-portfolio.sln", "./"]
 COPY ["src/DotNet-portfolio/DotNet-portfolio.csproj", "src/DotNet-portfolio/"]
 COPY ["tests/DotNet-portfolio.Tests/DotNet-portfolio.Tests.csproj", "tests/DotNet-portfolio.Tests/"]
+COPY ["tests/ApiTest/ApiTest.csproj", "tests/ApiTest/"]
 
 RUN dotnet restore "DotNet-portfolio.sln"
 

@@ -53,3 +53,5 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
 app.Run();
+
+public partial class Program { }
